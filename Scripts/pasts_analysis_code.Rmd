@@ -1,0 +1,292 @@
+---
+title: "Analysis code"
+output: html_notebook
+---
+
+Load packages and data, remove true independents
+
+
+
+```{r}
+library(tidyverse)
+library(here)
+library(sjPlot)
+survey_data <- read.csv(here("Data", "survey_data.csv"))
+
+
+```
+Remove independents (pid7 == 4)
+
+```{r}
+survey_data <- survey_data %>% mutate(dem_respondent = ifelse(pid7 == "Lean Democrat" | pid7 == "Not very strong Democrat" | pid7 == "Strong Democrat", 1, 0))
+survey_data <- survey_data %>% mutate(repub_respondent = ifelse(pid7 == "Lean Republican" | pid7 == "Not very strong Republican" | pid7 == "Strong Republican", 1, 0))
+
+survey_data <- survey_data %>% filter(pid7 != "Independent")
+```
+
+
+Data cleaning: convert factor responses to numerical values
+
+```{r}
+survey_data <- survey_data %>% mutate(happy = ifelse(happy == "Not at all", 0, 
+                                           ifelse(happy == "Somewhat", 1,
+                                                  ifelse(happy == "Moderately", 2, 3))))
+
+survey_data <- survey_data %>% mutate(anger = ifelse(anger == "Not at all", 0, 
+                                           ifelse(anger == "Somewhat", 1,
+                                                  ifelse(anger == "Moderately", 2, 3))))
+
+survey_data <- survey_data %>% mutate(courtconf = ifelse(courtconf == "Not at all confident", 0, 
+                                           ifelse(courtconf == "Somewhat confident", 1,
+                                                  ifelse(courtconf == "Moderately confident", 2, 3))))
+
+survey_data <- survey_data %>% mutate(elexconf = ifelse(elexconf == "Not at all confident", 0, 
+                                           ifelse(elexconf == "Somewhat confident", 1,
+                                                  ifelse(elexconf == "Moderately confident", 2, 3))))
+
+survey_data <- survey_data %>% mutate(norm_judges = ifelse(norm_judges == "Strongly disagree", -2, 
+                                           ifelse(norm_judges == "Disagree", -1,
+                                                  ifelse(norm_judges == "Neither agree nor disagree", 0, ifelse(norm_judges == "Agree", 1, 2)))))
+
+survey_data <- survey_data %>% mutate(norm_executive = ifelse(norm_executive == "Strongly disagree", -2, 
+                                           ifelse(norm_executive == "Disagree", -1,
+                                                  ifelse(norm_executive == "Neither agree nor disagree", 0, ifelse(norm_executive == "Agree", 1, 2)))))
+
+survey_data <- survey_data %>% mutate(norm_loyalty = ifelse(norm_loyalty == "Strongly disagree", -2, 
+                                           ifelse(norm_loyalty == "Disagree", -1,
+                                                  ifelse(norm_loyalty == "Neither agree nor disagree", 0, ifelse(norm_loyalty == "Agree", 1, 2)))))
+
+
+survey_data <- survey_data %>% mutate(demonstration = ifelse(demonstration == "Very unlikely", -2, 
+                                           ifelse(demonstration == "Somewhat unlikely", -1,
+                                                  ifelse(demonstration == "Neither likely nor unlikely", 0, ifelse(demonstration == "Somewhat likely", 1, 2)))))
+```
+
+
+Create democratic norm index variable
+
+```{r}
+survey_data <- survey_data %>% mutate(dem_norm_index = norm_judges + norm_executive + norm_loyalty)
+```
+
+
+Assign treatment conditions based on partisan ID: For Republican respondents, an acquittal of the hypothetical manipulators will be coded as an adverse ruling. For Democrats, a harsh punishment will be considered adverse to their partisan interests.
+
+```{r}
+survey_data <- survey_data %>% mutate(adverse_ruling = ifelse(repub_respondent == 1 & t2outcome == "clean", 1, ifelse(dem_respondent == 1 & t2outcome == "major", 1, 0))) #Note: This codes a minor ruling as not adverse for Dems
+
+
+```
+
+# Analysis
+
+## Demonstration
+
+```{r}
+m1_demonstration <- lm(demonstration ~ t1judicial + adverse_ruling + t1judicial*adverse_ruling, data = survey_data)
+summary(m1_demonstration)
+
+plot_model(m1_demonstration, type = "pred", terms = c("adverse_ruling", "t1judicial"))
+```
+
+### Democrats
+
+```{r}
+m2_demonstration_dems <- lm(demonstration ~ t1judicial + adverse_ruling + republican_therm_1 + t1judicial*adverse_ruling*republican_therm_1, data = survey_data %>% filter(dem_respondent == 1))
+summary(m2_demonstration_dems)
+
+plot_model(m2_demonstration_dems, type = "pred", terms = c("republican_therm_1", "t1judicial", "adverse_ruling")) #Min (and mode), median, and a high value
+
+
+m3_demonstration_dems <- lm(demonstration ~ t1judicial + adverse_ruling + dem_norm_index + t1judicial*adverse_ruling*dem_norm_index, data = survey_data %>% filter(dem_respondent == 1))
+summary(m3_demonstration_dems)
+
+plot_model(m3_demonstration_dems, type = "pred", terms = c("dem_norm_index", "t1judicial", "adverse_ruling")) #Median +- 1 SD (rounded)
+
+```
+
+### Republicans
+
+```{r}
+m2_demonstration_reps <- lm(demonstration ~ t1judicial + adverse_ruling + democrat_therm_1 + t1judicial*adverse_ruling*democrat_therm_1, data = survey_data %>% filter(repub_respondent == 1))
+summary(m2_demonstration_reps)
+
+plot_model(m2_demonstration_reps, type = "pred", terms = c("democrat_therm_1", "adverse_ruling", "t1judicial")) 
+
+m3_demonstration_reps <- lm(demonstration ~ t1judicial + adverse_ruling + dem_norm_index + t1judicial*adverse_ruling*dem_norm_index, data = survey_data %>% filter(repub_respondent == 1))
+summary(m3_demonstration_reps)
+
+plot_model(m3_demonstration_reps, type = "pred", terms = c( "dem_norm_index", "adverse_ruling", "t1judicial" )) 
+```
+
+
+
+## Anger
+
+```{r}
+m1_anger <- lm(anger ~ t1judicial + adverse_ruling + t1judicial*adverse_ruling, data = survey_data)
+summary(m1_anger)
+
+plot_model(m1_anger, type = "pred", terms = c("t1judicial", "adverse_ruling"))
+```
+
+### Democrats
+
+```{r}
+m2_anger_dems <- lm(anger ~ t1judicial + adverse_ruling + republican_therm_1 + t1judicial*adverse_ruling*republican_therm_1, data = survey_data %>% filter(dem_respondent == 1))
+summary(m2_anger_dems)
+
+plot_model(m2_anger_dems, type = "pred", terms = c("t1judicial", "adverse_ruling", "republican_therm_1 [0, 20, 80]"))
+
+
+m3_anger_dems <- lm(anger ~ t1judicial + adverse_ruling + dem_norm_index + t1judicial*adverse_ruling*dem_norm_index, data = survey_data %>% filter(dem_respondent == 1))
+summary(m3_anger_dems)
+
+plot_model(m3_anger_dems, type = "pred", terms = c("t1judicial", "adverse_ruling", "dem_norm_index [-5, -2, 1]"))
+
+
+```
+
+### Republicans
+
+```{r}
+m2_anger_reps <- lm(anger ~ t1judicial + adverse_ruling + democrat_therm_1 + t1judicial*adverse_ruling*democrat_therm_1, data = survey_data %>% filter(repub_respondent == 1))
+summary(m2_anger_reps)
+
+plot_model(m2_anger_reps, type = "pred", terms = c("t1judicial", "adverse_ruling", "democrat_therm_1 [0, 20, 80]"))
+
+m3_anger_reps <- lm(anger ~ t1judicial + adverse_ruling + dem_norm_index + t1judicial*adverse_ruling*dem_norm_index, data = survey_data %>% filter(repub_respondent == 1))
+summary(m3_anger_reps)
+
+plot_model(m3_anger_reps, type = "pred", terms = c("t1judicial", "adverse_ruling", "dem_norm_index [-4, -1, 2]"))
+
+```
+
+
+
+
+## Confidence in courts
+
+```{r}
+m1_court_conf <- lm(courtconf ~ t1judicial + adverse_ruling + t1judicial*adverse_ruling, data = survey_data)
+summary(m1_court_conf)
+
+plot_model(m1_court_conf, type = "pred", terms = c("t1judicial", "adverse_ruling"))
+
+```
+
+### Democrats
+
+```{r}
+m2_court_conf_dems <- lm(courtconf ~ t1judicial + adverse_ruling + republican_therm_1 + t1judicial*adverse_ruling*republican_therm_1, data = survey_data %>% filter(dem_respondent == 1))
+summary(m2_court_conf_dems)
+
+plot_model(m2_court_conf_dems, type = "pred", terms = c("t1judicial", "adverse_ruling", "republican_therm_1 [0, 20, 80]"))
+
+
+m3_court_conf_dems <- lm(courtconf ~ t1judicial + adverse_ruling + dem_norm_index + t1judicial*adverse_ruling*dem_norm_index, data = survey_data %>% filter(dem_respondent == 1))
+summary(m3_court_conf_dems)
+
+plot_model(m3_court_conf_dems, type = "pred", terms = c("t1judicial", "adverse_ruling", "dem_norm_index [-5, -2, 1]"))
+
+```
+
+### Republicans
+
+```{r}
+m2_court_conf_reps <- lm(courtconf ~ t1judicial + adverse_ruling + democrat_therm_1 + t1judicial*adverse_ruling*democrat_therm_1, data = survey_data %>% filter(repub_respondent == 1))
+summary(m2_court_conf_reps)
+
+plot_model(m2_court_conf_reps, type = "pred", terms = c("t1judicial", "adverse_ruling", "democrat_therm_1 [0, 20, 80]"))
+
+m3_court_conf_reps <- lm(courtconf ~ t1judicial + adverse_ruling + dem_norm_index + t1judicial*adverse_ruling*dem_norm_index, data = survey_data %>% filter(repub_respondent == 1))
+summary(m3_court_conf_reps)
+
+plot_model(m3_court_conf_reps, type = "pred", terms = c("t1judicial", "adverse_ruling", "dem_norm_index [-4, -1, 2]"))
+
+```
+
+
+
+
+## Confidence in election integrity
+
+```{r}
+m1_elex_conf <- lm(elexconf ~ t1judicial + adverse_ruling + t1judicial*adverse_ruling, data = survey_data)
+summary(m1_elex_conf)
+
+plot_model(m1_elex_conf, type = "pred", terms = c("t1judicial", "adverse_ruling"))
+
+```
+
+### Democrats
+
+```{r}
+m2_elex_conf_dems <- lm(elexconf ~ t1judicial + adverse_ruling + republican_therm_1 + t1judicial*adverse_ruling*republican_therm_1, data = survey_data %>% filter(dem_respondent == 1))
+summary(m2_elex_conf_dems)
+
+plot_model(m2_elex_conf_dems, type = "pred", terms = c("t1judicial", "adverse_ruling", "republican_therm_1 [0, 20, 80]"))
+
+
+m3_elex_conf_dems <- lm(elexconf ~ t1judicial + adverse_ruling + dem_norm_index + t1judicial*adverse_ruling*dem_norm_index, data = survey_data %>% filter(dem_respondent == 1))
+summary(m3_elex_conf_dems)
+
+
+plot_model(m3_elex_conf_dems, type = "pred", terms = c("t1judicial", "adverse_ruling", "dem_norm_index [-5, -2, 1]"))
+
+```
+
+### Republicans
+
+```{r}
+m2_elex_conf_reps <- lm(elexconf ~ t1judicial + adverse_ruling + democrat_therm_1 + t1judicial*adverse_ruling*democrat_therm_1, data = survey_data %>% filter(repub_respondent == 1))
+summary(m2_elex_conf_reps)
+
+plot_model(m2_elex_conf_reps, type = "pred", terms = c("t1judicial", "adverse_ruling", "democrat_therm_1 [0, 20, 80]"))
+
+m3_elex_conf_reps <- lm(elexconf ~ t1judicial + adverse_ruling + dem_norm_index + t1judicial*adverse_ruling*dem_norm_index, data = survey_data %>% filter(repub_respondent == 1))
+summary(m3_elex_conf_reps)
+
+
+plot_model(m3_elex_conf_reps, type = "pred", terms = c("t1judicial", "adverse_ruling", "dem_norm_index [-4, -1, 2]"))
+
+```
+
+
+## Hypothesis pre-registered
+
+ When courts hold election-manipulating agents criminally accountable, it should reduce partisan losers' support for post-election protes
+```{r}
+survey_data$t2outcome <- relevel(as.factor(survey_data$t2outcome), ref = "minor") 
+survey_data$pid3 <- relevel(as.factor(survey_data$pid3), ref = "Democrat") 
+
+
+m.anger <- lm(anger ~ t2outcome*pid3 , data = survey_data)
+summary(m.anger)
+
+m2.anger <- lm(anger ~ t2outcome*pid3*t1judicial , data = survey_data)
+summary(m2.anger)
+
+plot_model(m2.anger, type = "pred", terms = c("t2outcome", "t1judicial", "pid3 [Democrat, Independent, Republican]"))
+```
+
+
+
+
+### NOT PRE-REGISTERED ###
+
+```{r}
+m1_anger_ei_dem <- lm(anger ~ t1judicial + adverse_ruling + t1judicial*adverse_ruling*elexfair, data = survey_data %>% filter(dem_respondent == 1))
+summary(m1_anger_ei_dem)
+
+plot_model(m1_anger_ei_rep, type = "pred", terms = c("t1judicial", "adverse_ruling", "elexfair"))
+
+m1_anger_ei_rep <- lm(anger ~ t1judicial + adverse_ruling + t1judicial*adverse_ruling*elexfair, data = survey_data %>% filter(repub_respondent == 1))
+summary(m1_anger_ei_rep)
+
+plot_model(m1_anger_ei_rep, type = "pred", terms = c("t1judicial", "adverse_ruling", "elexfair"))
+
+
+
+
+```
