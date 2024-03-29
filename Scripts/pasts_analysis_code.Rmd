@@ -136,13 +136,13 @@ plot_model(m1_anger, type = "pred", terms = c("t1judicial", "adverse_ruling"))
 m2_anger_dems <- lm(anger ~ t1judicial + adverse_ruling + republican_therm_1 + t1judicial*adverse_ruling*republican_therm_1, data = survey_data %>% filter(dem_respondent == 1))
 summary(m2_anger_dems)
 
-plot_model(m2_anger_dems, type = "pred", terms = c("t1judicial", "adverse_ruling", "republican_therm_1 [0, 20, 80]"))
+plot_model(m2_anger_dems, type = "pred", terms = c("republican_therm_1", "adverse_ruling", "t1judicial"))
 
 
 m3_anger_dems <- lm(anger ~ t1judicial + adverse_ruling + dem_norm_index + t1judicial*adverse_ruling*dem_norm_index, data = survey_data %>% filter(dem_respondent == 1))
 summary(m3_anger_dems)
 
-plot_model(m3_anger_dems, type = "pred", terms = c("t1judicial", "adverse_ruling", "dem_norm_index [-5, -2, 1]"))
+plot_model(m3_anger_dems, type = "pred", terms = c("dem_norm_index", "adverse_ruling", "t1judicial"))
 
 
 ```
@@ -153,12 +153,12 @@ plot_model(m3_anger_dems, type = "pred", terms = c("t1judicial", "adverse_ruling
 m2_anger_reps <- lm(anger ~ t1judicial + adverse_ruling + democrat_therm_1 + t1judicial*adverse_ruling*democrat_therm_1, data = survey_data %>% filter(repub_respondent == 1))
 summary(m2_anger_reps)
 
-plot_model(m2_anger_reps, type = "pred", terms = c("t1judicial", "adverse_ruling", "democrat_therm_1 [0, 20, 80]"))
+plot_model(m2_anger_reps, type = "pred", terms = c("democrat_therm_1", "adverse_ruling", "t1judicial"))
 
 m3_anger_reps <- lm(anger ~ t1judicial + adverse_ruling + dem_norm_index + t1judicial*adverse_ruling*dem_norm_index, data = survey_data %>% filter(repub_respondent == 1))
 summary(m3_anger_reps)
 
-plot_model(m3_anger_reps, type = "pred", terms = c("t1judicial", "adverse_ruling", "dem_norm_index [-4, -1, 2]"))
+plot_model(m3_anger_reps, type = "pred", terms = c("dem_norm_index", "adverse_ruling", "t1judicial"))
 
 ```
 
@@ -181,7 +181,7 @@ plot_model(m1_court_conf, type = "pred", terms = c("t1judicial", "adverse_ruling
 m2_court_conf_dems <- lm(courtconf ~ t1judicial + adverse_ruling + republican_therm_1 + t1judicial*adverse_ruling*republican_therm_1, data = survey_data %>% filter(dem_respondent == 1))
 summary(m2_court_conf_dems)
 
-plot_model(m2_court_conf_dems, type = "pred", terms = c("t1judicial", "adverse_ruling", "republican_therm_1 [0, 20, 80]"))
+plot_model(m2_court_conf_dems, type = "pred", terms = c("republican_therm_1", "adverse_ruling", "t1judicial"))
 
 
 m3_court_conf_dems <- lm(courtconf ~ t1judicial + adverse_ruling + dem_norm_index + t1judicial*adverse_ruling*dem_norm_index, data = survey_data %>% filter(dem_respondent == 1))
@@ -197,7 +197,7 @@ plot_model(m3_court_conf_dems, type = "pred", terms = c("t1judicial", "adverse_r
 m2_court_conf_reps <- lm(courtconf ~ t1judicial + adverse_ruling + democrat_therm_1 + t1judicial*adverse_ruling*democrat_therm_1, data = survey_data %>% filter(repub_respondent == 1))
 summary(m2_court_conf_reps)
 
-plot_model(m2_court_conf_reps, type = "pred", terms = c("t1judicial", "adverse_ruling", "democrat_therm_1 [0, 20, 80]"))
+plot_model(m2_court_conf_reps, type = "pred", terms = c("democrat_therm_1", "adverse_ruling", "t1judicial"))
 
 m3_court_conf_reps <- lm(courtconf ~ t1judicial + adverse_ruling + dem_norm_index + t1judicial*adverse_ruling*dem_norm_index, data = survey_data %>% filter(repub_respondent == 1))
 summary(m3_court_conf_reps)
@@ -225,14 +225,14 @@ plot_model(m1_elex_conf, type = "pred", terms = c("t1judicial", "adverse_ruling"
 m2_elex_conf_dems <- lm(elexconf ~ t1judicial + adverse_ruling + republican_therm_1 + t1judicial*adverse_ruling*republican_therm_1, data = survey_data %>% filter(dem_respondent == 1))
 summary(m2_elex_conf_dems)
 
-plot_model(m2_elex_conf_dems, type = "pred", terms = c("t1judicial", "adverse_ruling", "republican_therm_1 [0, 20, 80]"))
+plot_model(m2_elex_conf_dems, type = "pred", terms = c("republican_therm_1", "adverse_ruling", "t1judicial"))
 
 
 m3_elex_conf_dems <- lm(elexconf ~ t1judicial + adverse_ruling + dem_norm_index + t1judicial*adverse_ruling*dem_norm_index, data = survey_data %>% filter(dem_respondent == 1))
 summary(m3_elex_conf_dems)
 
 
-plot_model(m3_elex_conf_dems, type = "pred", terms = c("t1judicial", "adverse_ruling", "dem_norm_index [-5, -2, 1]"))
+plot_model(m3_elex_conf_dems, type = "pred", terms = c("dem_norm_index", "adverse_ruling", "t1judicial"))
 
 ```
 
@@ -242,7 +242,7 @@ plot_model(m3_elex_conf_dems, type = "pred", terms = c("t1judicial", "adverse_ru
 m2_elex_conf_reps <- lm(elexconf ~ t1judicial + adverse_ruling + democrat_therm_1 + t1judicial*adverse_ruling*democrat_therm_1, data = survey_data %>% filter(repub_respondent == 1))
 summary(m2_elex_conf_reps)
 
-plot_model(m2_elex_conf_reps, type = "pred", terms = c("t1judicial", "adverse_ruling", "democrat_therm_1 [0, 20, 80]"))
+plot_model(m2_elex_conf_reps, type = "pred", terms = c("democrat_therm_1", "adverse_ruling", "t1judicial"))
 
 m3_elex_conf_reps <- lm(elexconf ~ t1judicial + adverse_ruling + dem_norm_index + t1judicial*adverse_ruling*dem_norm_index, data = survey_data %>% filter(repub_respondent == 1))
 summary(m3_elex_conf_reps)
@@ -257,6 +257,7 @@ plot_model(m3_elex_conf_reps, type = "pred", terms = c("t1judicial", "adverse_ru
 
  When courts hold election-manipulating agents criminally accountable, it should reduce partisan losers' support for post-election protes
 ```{r}
+survey_data <- survey_data %>% mutate(polar = abs(democrat_therm_1 - republican_therm_1))
 survey_data$t2outcome <- relevel(as.factor(survey_data$t2outcome), ref = "minor") 
 survey_data$pid3 <- relevel(as.factor(survey_data$pid3), ref = "Democrat") 
 
@@ -264,10 +265,16 @@ survey_data$pid3 <- relevel(as.factor(survey_data$pid3), ref = "Democrat")
 m.anger <- lm(anger ~ t2outcome*pid3 , data = survey_data)
 summary(m.anger)
 
-m2.anger <- lm(anger ~ t2outcome*pid3*t1judicial , data = survey_data)
+m2.anger <- lm(anger ~ t2outcome*t1judicial , data = survey_data %>% filter(pid3 == "Democrat"))
 summary(m2.anger)
 
-plot_model(m2.anger, type = "pred", terms = c("t2outcome", "t1judicial", "pid3 [Democrat, Independent, Republican]"))
+plot_model(m2.anger, type = "pred", terms = c("t2outcome", "t1judicial"))
+
+
+m3.anger <- lm(anger ~ t2outcome*pid3*polar , data = survey_data)
+summary(m3.anger)
+plot_model(m3.anger, type = "pred", terms = c("polar", "pid3 [Democrat, Republican]", "t2outcome"))
+
 ```
 
 
@@ -279,7 +286,7 @@ plot_model(m2.anger, type = "pred", terms = c("t2outcome", "t1judicial", "pid3 [
 m1_anger_ei_dem <- lm(anger ~ t1judicial + adverse_ruling + t1judicial*adverse_ruling*elexfair, data = survey_data %>% filter(dem_respondent == 1))
 summary(m1_anger_ei_dem)
 
-plot_model(m1_anger_ei_rep, type = "pred", terms = c("t1judicial", "adverse_ruling", "elexfair"))
+plot_model(m1_anger_ei_dem, type = "pred", terms = c("t1judicial", "adverse_ruling", "elexfair"))
 
 m1_anger_ei_rep <- lm(anger ~ t1judicial + adverse_ruling + t1judicial*adverse_ruling*elexfair, data = survey_data %>% filter(repub_respondent == 1))
 summary(m1_anger_ei_rep)

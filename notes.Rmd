@@ -1,0 +1,18 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+Notes on how to proceed:
+
+1) Independence treatment does appear to reduce anger following an adverse ruling (across the board).
+  A) Independence treatment reduces anger among moderate- and low-polarization Democrats in an adverse ruling (partisan winners facing a court loss)
+  B) Less effect on Republicans (partisan losers)
+  
+2) 
+
+General ideas:
+
+We are looking at partisan winners and losers' feelings of anger as mediated by court rulings
+  - This connects to literature on winning and losing, and on effect of courts in addressing election legitimacy
